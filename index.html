@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Biotea PMC Clustering</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <!-- Optional Bootstrap theme -->
+    <link rel="stylesheet" href="http://bootswatch.com/paper/bootstrap.min.css" crossorigin="anonymous">
+
+    <!-- Include SmartWizard CSS -->
+    <link href="css/smart_wizard.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Optional SmartWizard theme -->
+    <link href="css/smart_wizard_theme_circles.css" rel="stylesheet" type="text/css" />
+    <link href="css/smart_wizard_theme_arrows.css" rel="stylesheet" type="text/css" />
+    <link href="css/smart_wizard_theme_dots.css" rel="stylesheet" type="text/css" />
+    <link href="css/d3.dendogram.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="js/form_complete.js"></script>
+    <script src="js/jquery.ncbo.autocomplete.js"></script>
+</head>
+<body>
+    <div class="container">
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Biotea Explorer</a>
+        </div>
+      </div>
+    </nav>
+        <div id="smartwizard">
+            <ul>
+                <li><a href="#step-1">Filtering Articles<br /><small>Select a concept from some ontology</small></a></li>
+                <li><a href="#step-2">Filtering Annotations<br /><small>Select an Ontology</small></a></li>
+                <li><a href="#step-3">Preview the resulting dataset<br /><small>Preview your target articles data</small></a></li>
+                <li><a href="#step-4">Clustering<br /><small>Visualize your results</small></a></li>
+            </ul>
+            
+            <div>
+                <div id="step-1" class="">
+                    <h3>Filter your target articles selecting a concept</h3>
+                    <div class="form-group" id="conceptInput">
+                        <input type="text" class="typeahead tt-query form-control" style="width: 50%" placeholder="Start typing Ontology Name" autocomplete="off" spellcheck="false" size="80%" id="conceptOntology">
+                        <p>e.g. SNOMED CT</p>
+                        <br>
+                        <input type="text" placeholder="First select an Ontology" style="width: 50%" name="a" class=" form-control" id="bioportalSelect" disabled="true" />
+                        <p>e.g. Renal cell carcinoma</p>
+                    </div>
+                </div>
+                <div id="step-2" class="">
+                    <h3>Filter your target annotations selecting a source ontology</h3>
+                    <input type="text" class="typeahead tt-query" placeholder="Start typing Ontology Name" autocomplete="off" spellcheck="false" size="80%" id="ontology">
+                    <p>e.g. SNOMED CT</p>
+                </div>
+                <div id="step-3" class="">
+                <div class="alert alert-dismissible alert-danger" style="display: none" id="articleNotFoundAlert">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  <strong>Results not found!</strong> There is not articles for the selected <span id="#ontologyName"></span> concept.
+                </div>
+                <div class="alert alert-dismissible alert-danger" style="display: none" id="annotationsNotFoundAlert">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  <strong>Results not found!</strong> There is not annotations for the selected ontology over the filtered articles.
+                </div>
+                    <h3>Dataset preview</h3>
+                    <div id="previewData">
+                      <h4>Number of articles: <span id="articlesNumber"></span></h4>
+                      <h4>Number of annotations: <span id="annotationsNumber"></span></h4>  
+                    </div>
+                    <div class="alert alert-warning" role="alert" id="timeAlert" style="display: none">This could take several minutes!</div>
+                </div>
+                <div id="step-4" class="">
+                    <h3>Clustering results</h3>
+                    <ul class="nav nav-tabs">
+                      <li class="active"><a href="#dendogram" data-toggle="tab" aria-expanded="false">Dendogram</a></li>
+                      <li class=""><a href="#tags" data-toggle="tab" aria-expanded="true">Cloud of tags</a></li>
+                      <li class=""><a href="#stats" data-toggle="tab" aria-expanded="true">Statistics</a></li>
+                    </ul>
+                    <div id="myTabContent" class="tab-content">
+                      <div class="tab-pane fade active in" id="dendogram">
+                      <div class="alert alert-info" role="alert" id="zoomAlert" style="display: none">
+                      <button type="button" class="close" data-dismiss="alert">&times;</button>
+                      <strong>This is a huge dendogram!</strong> Use the mouse wheel to zoom and drag the dendogram to pan</div>
+                      <div class="row">
+                        <div id="chart" class="col-md-8" style="margin: 9px; border: 3px solid #cdcdcd; border-radius: 34px;"></div>
+                        <div id="legend" class="col-md-2">
+                            <div style="font-weight: bolder;">Low similarity <div style="background-color: rgb(31, 119, 180); display: inline-flex; height: 15px; width: 15px; padding: 4px;" ></div></div>
+                            <div style="font-weight: bolder;">Medium similarity <div style="background-color: rgb(255, 127, 14); display: inline-flex; height: 15px; width: 15px; padding: 4px;" ></div></div>
+                            <div style="font-weight: bolder;">High similarity <div style="background-color: rgb(44, 160, 44); display: inline-flex; height: 15px; width: 15px; padding: 4px;" ></div></div>
+                        </div>
+                      </div>
+                      </div>
+                      <div class="tab-pane fade" id="tags">
+                        <div>
+                            <table class="table table-bordered" id="tag-cloud">
+                            <thead>
+                              <tr>
+                                <th>Cluster #</th>
+                                <th>Articles</th>
+                                <th>Common annotations</th>
+                              </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                      </div>
+                      <div class="tab-pane fade" id="stats">
+                      <div class="row" id="dashboard">
+                      <div class="col-md-6" id="yearContainer"><canvas id="year" width="400" height="400"></canvas></div>
+                      <div class="col-md-6" id="journalContainer"><canvas id="journal" width="400" height="400"></canvas></div>
+                      </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    <footer>
+            <div class="row">
+              <div class="col-lg-12">
+                <!--p>Made by <a href="http://thomaspark.co" rel="nofollow">Federico Lopez Gomez</a>. Contact him at <a href="mailto:fico89@gmail.com">fico89@gmail.com</a>.</p>
+                <p>Code released under the <a href="https://github.com/thomaspark/bootswatch/blob/gh-pages/LICENSE">MIT License</a>.</p-->
+                <p>Based on <a href="http://getbootstrap.com" rel="nofollow">Bootstrap</a>. Icons from <a href="http://fortawesome.github.io/Font-Awesome/" rel="nofollow">Font Awesome</a>. Web fonts from <a href="http://www.google.com/webfonts" rel="nofollow">Google</a>.</p>
+              </div>
+            </div>
+
+          </footer>
+    </div>
+    
+    <!-- Include jQuery -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Include SmartWizard JavaScript source -->
+    <script type="text/javascript" src="js/jquery.smartWizard.min.js"></script>
+    <script src="js/typeahead.bundle_old.js"></script>
+    <script src="js/handlebars-v4.0.10.js"></script>
+    <script src="js/main.js" ></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/spin.min.js"></script>
+    <script src="js/d3.dendogram.js"></script>
+    <script src="js/palette.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
